@@ -1,5 +1,7 @@
 # EFR32 Infrared
 
+This project shows how to send a frame on a GPIO. Sending is perfomed by hardware (PRS, DMA, TIMER) and will not be affected by IRQ timings.
+
 ![Alt text](ir_send.PNG?raw=true "Optional Title")
 
 # Disclaimer
