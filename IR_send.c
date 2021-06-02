@@ -206,13 +206,13 @@ void initPrs_And(void)
   /*init CMU*/
   CMU_ClockEnable(cmuClock_PRS, true);
 
-  // Route PRS TIMER2 on PRS
+  // Route PRS TIMER1 CC0 on PRS_CH + 1
   PRS_SourceAsyncSignalSet(
     PRS_CH + 1,
     PRS_ASYNC_CH_CTRL_SOURCESEL_TIMER1,
     _PRS_ASYNC_CH_CTRL_SIGSEL_TIMER1CC0);
 
-  // Route PRS TIMER1 on PRS
+  // Route TIMER2 CC0 on PRS_CH
   PRS_SourceAsyncSignalSet(
     PRS_CH,
     PRS_ASYNC_CH_CTRL_SOURCESEL_TIMER2,
