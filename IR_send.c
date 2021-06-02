@@ -116,7 +116,6 @@ void IR_generate_freq(void)
   timerCCInit.mode = timerCCModePWM;
   timerCCInit.prsOutput = timerPrsOutputLevel;
 
-
   // configure, but do not start timer
   TIMER_Init(TIMER2, &timerInit);
 
@@ -132,7 +131,6 @@ void IR_generate_freq(void)
   TIMER_TopSet (TIMER2, topValue);
   /*Set compare value for initial duty cycle with the CCV register*/
   TIMER_CompareSet(TIMER2, 0, (uint32_t)(topValue * dutyCycle));
-
 
   TIMER_Enable(TIMER2, true);
 }
