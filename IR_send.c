@@ -19,20 +19,23 @@
 #define CARRIER_FREQUENCY 38000
 #define PRS_CH 2
 #define IR_SEND_DEBUG
-
-/************************************************************************************/
-
 #define DUMMY_VALUE 1000
 
-int IR_frame[] = {DUMMY_VALUE, 560, 560, 560, 1600, 560, 560, 1600, 560, 560, 560, 1600, 560, 1600, 0};
+uint8_t count = 0;
+uint32_t timer1Freq = 0;
+
+int IR_frame[] = {DUMMY_VALUE, 560, 200, 560, 1600, 400, 150, 800, 3000, 40, DUMMY_VALUE};
 const int length_IR_frame = sizeof (IR_frame) / sizeof (int);
 
-uint32_t top_value_index = 0;
-uint8_t count;
-uint32_t timer1Freq = 0;
 
 void ir_frame_setup()
 {
+   if ((length_IR_frame % 2) == 0)
+   {
+      emberAfCorePrintln("Number of input symbol should be a odd number");
+      abort();
+   }
+
    uint64_t v;
    for (uint32_t i = 0; i < length_IR_frame; i++)
    {
@@ -49,19 +52,21 @@ void ir_frame_setup()
       }
       IR_frame[i] = v & 0xFFFF;
    }
+   /* Set last dummy value to maximum */
+   IR_frame[length_IR_frame - 1] = 0xFFFF;
 }
 
 void IR_generate_STOP(void)
 {
-	TIMER_Enable(TIMER1,false);
-	TIMER_Enable(TIMER2,false);
+  TIMER_Enable(TIMER1,false);
+  TIMER_Enable(TIMER2,false);
 }
 
 
 void ir_init_topB(void)
 {
-    TIMER_TopSet(TIMER1, IR_frame[0]);
-    TIMER_TopBufSet(TIMER1, IR_frame[1]);
+  TIMER_TopSet(TIMER1, IR_frame[0]);
+  TIMER_TopBufSet(TIMER1, IR_frame[1]);
 }
 /**************************************************************************//**
  * @brief
@@ -77,6 +82,9 @@ void TIMER1_IRQHandler(void)
   if ((flags & TIMER_IF_OF) == 0)
     return;
 
+  if ((TIMER1->STATUS & TIMER_STATUS_RUNNING) == 0)
+     return;
+
   if (++count == length_IR_frame - 1)
   /* End of transfer */
   {
@@ -88,11 +96,7 @@ void TIMER1_IRQHandler(void)
 
 /**************************************************************************//**
  * @brief
- *    IR generate freq
- *    - Generation of the 38kHz with a certain duty cycle with TIMER 2 CC0
- *    - No need interrupt
- *    - In PWM mode, overflow events set the output pin, while
- *    compare events clear the pin
+ *    IR generate 38kHz with a certain duty cycle with TIMER 2 CC0
  *****************************************************************************/
 
 static volatile float dutyCycle = 0;
@@ -135,27 +139,23 @@ void IR_generate_freq(void)
 
 /**************************************************************************//**
  * @brief
- *	IR generate time base
- *	This function will generate an interrupt each half "logic NEC bit" with TIMER1.
- *	In the NEC protocol is about 562us.
- *
+ *  IR generate time base
  *****************************************************************************/
 
 void IR_generate_timebase(void)
 {
-	CMU_ClockEnable(cmuClock_TIMER1, true);
+  CMU_ClockEnable(cmuClock_TIMER1, true);
+  count = 0;
+  /*Initialize the timer*/
+  TIMER_Init_TypeDef timerInit = TIMER_INIT_DEFAULT;
 
-	/*Initialize the timer*/
-	TIMER_Init_TypeDef timerInit = TIMER_INIT_DEFAULT;
-
-	timerInit.prescale = timerPrescale8;
-	timerInit.enable = false;
+  timerInit.prescale = timerPrescale8;
+  timerInit.enable = false;
   timerInit.clkSel = timerClkSelHFPerClk;
 
-	// configure, but do not start timer
-	TIMER_Init(TIMER1, &timerInit);
+  // configure, but do not start timer
+  TIMER_Init(TIMER1, &timerInit);
 
-	top_value_index = 0;
   timer1Freq = CMU_ClockFreqGet(cmuClock_TIMER1)/(timerInit.prescale + 1);
   emberAfCorePrintln("%timer1 frequency : %d", timer1Freq);
   ir_frame_setup();
@@ -187,7 +187,7 @@ void IR_generate_timebase(void)
                           &(TIMER1->TOPB),
                           &IR_frame[2],
                           1,
-                          length_IR_frame,
+                          length_IR_frame - 2,
                           dmadrvDataSize4,
                           NULL,
                           NULL);
