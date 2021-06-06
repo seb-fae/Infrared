@@ -56,12 +56,6 @@ void ir_frame_setup()
    IR_frame[length_IR_frame - 1] = 0xFFFF;
 }
 
-void IR_generate_STOP(void)
-{
-  TIMER_Enable(TIMER1,false);
-  TIMER_Enable(TIMER2,false);
-}
-
 
 void ir_init_topB(void)
 {
@@ -88,7 +82,8 @@ void TIMER1_IRQHandler(void)
   if (++count == length_IR_frame - 1)
   /* End of transfer */
   {
-     IR_generate_STOP();
+     TIMER_Enable(TIMER1,false);
+     TIMER_Enable(TIMER2,false);
      GPIO_PinOutClear(SEND_PORT_BRD4182A, SEND_PIN_BRD4182A);
   }
 }
