@@ -223,8 +223,9 @@ void IR_init_send()
 {
   /*init CMU*/
   CMU_ClockEnable(cmuClock_GPIO, true);
-  /*init Send PORT*/
+  /* Send pin*/
   GPIO_PinModeSet(SEND_PORT_BRD4182A, SEND_PIN_BRD4182A, gpioModePushPull, 0);
+  /* Optionnal debug on PB0 */
   GPIO_PinModeSet(SEND_PORT_BRD4182A, 1, gpioModePushPull, 0);
 
   initPrs_And();
