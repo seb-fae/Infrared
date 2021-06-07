@@ -13,9 +13,10 @@
 #include "em_timer.h"
 #include "dmadrv.h"
 
-#include "IR_send.h"
+#define SEND_PORT_BRD4182A gpioPortB
+#define SEND_PIN_BRD4182A 1
 
-
+#define DUTY_CYCLE_STEPS  0.335
 #define CARRIER_FREQUENCY 38000
 #define PRS_CH 2
 #define IR_SEND_DEBUG
@@ -56,6 +57,12 @@ void ir_frame_setup()
    IR_frame[length_IR_frame - 1] = 0xFFFF;
 }
 
+void IR_generate_STOP(void)
+{
+  TIMER_Enable(TIMER1,false);
+  TIMER_Enable(TIMER2,false);
+}
+
 
 void ir_init_topB(void)
 {
@@ -82,8 +89,7 @@ void TIMER1_IRQHandler(void)
   if (++count == length_IR_frame - 1)
   /* End of transfer */
   {
-     TIMER_Enable(TIMER1,false);
-     TIMER_Enable(TIMER2,false);
+     IR_generate_STOP();
      GPIO_PinOutClear(SEND_PORT_BRD4182A, SEND_PIN_BRD4182A);
   }
 }
@@ -111,6 +117,7 @@ void IR_generate_freq(void)
   timerCCInit.mode = timerCCModePWM;
   timerCCInit.prsOutput = timerPrsOutputLevel;
 
+
   // configure, but do not start timer
   TIMER_Init(TIMER2, &timerInit);
 
@@ -126,6 +133,7 @@ void IR_generate_freq(void)
   TIMER_TopSet (TIMER2, topValue);
   /*Set compare value for initial duty cycle with the CCV register*/
   TIMER_CompareSet(TIMER2, 0, (uint32_t)(topValue * dutyCycle));
+
 
   TIMER_Enable(TIMER2, true);
 }
@@ -223,9 +231,8 @@ void IR_init_send()
 {
   /*init CMU*/
   CMU_ClockEnable(cmuClock_GPIO, true);
-  /* Send pin*/
+  /*init Send PORT*/
   GPIO_PinModeSet(SEND_PORT_BRD4182A, SEND_PIN_BRD4182A, gpioModePushPull, 0);
-  /* Optionnal debug on PB0 */
   GPIO_PinModeSet(SEND_PORT_BRD4182A, 1, gpioModePushPull, 0);
 
   initPrs_And();
