@@ -2,7 +2,11 @@
 
 This project shows how to send a frame on a GPIO with precise timings. Sending is perfomed by hardware (PRS, DMA, TIMER) and will not be affected by IRQ timings or CPU load.
 
+## Transmission: 
+
 ![Alt text](ir_send.PNG?raw=true "Optional Title")
+
+## Reception:
 
 ![Alt text](ir_receive.PNG?raw=true "Optional Title")
 
