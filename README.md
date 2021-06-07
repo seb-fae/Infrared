@@ -1,6 +1,6 @@
 # EFR32 Infrared
 
-This project shows how to send a frame on a GPIO with precise timings. Sending/Reception is perfomed by hardware (PRS, DMA, TIMER) and will not be affected by IRQ timings or CPU load.
+This project shows how to send and receive a frame on a GPIO with precise timings. Sending/Reception is perfomed by hardware (PRS, DMA, TIMER) and will not be affected by IRQ timings or CPU load.
 
 ## Transmission: 
 
