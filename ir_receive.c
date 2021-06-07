@@ -1,8 +1,10 @@
 #ifndef IR_SEND_C_
 #define IR_SEND_C_
 
-#include "ir.h"
 #include "app/framework/include/af.h"
+
+#define SEND_PORT_BRD4182A gpioPortB
+#define SEND_PIN_BRD4182A 1
 
 #include "em_device.h"
 #include "em_cmu.h"
@@ -12,7 +14,7 @@
 #include "em_timer.h"
 #include "dmadrv.h"
 
-uint32_t receive_len;
+uint32_t receive_len, remaining;
 uint32_t *receive_data;
 unsigned int dma_channel;
 uint32_t timerFreq = 0;
