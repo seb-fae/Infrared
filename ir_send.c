@@ -24,6 +24,7 @@
 
 uint8_t count = 0;
 uint32_t timer1Freq = 0;
+unsigned int channel;
 
 int IR_frame[] = {DUMMY_VALUE, 560, 200, 560, 1600, 400, 150, 800, 3000, 40, DUMMY_VALUE};
 const int length_IR_frame = sizeof (IR_frame) / sizeof (int);
@@ -59,6 +60,7 @@ void ir_frame_setup()
 
 void IR_generate_STOP(void)
 {
+  DMADRV_FreeChannel(&channel);
   TIMER_Enable(TIMER1,false);
   TIMER_Enable(TIMER2,false);
 }
@@ -177,8 +179,7 @@ void IR_generate_timebase(void)
   /* Load two first values in TIMER1 */
   ir_init_topB();
 
-  /* Setup DMA */
-  unsigned int channel;
+
   /* Initialize DMA */
   DMADRV_Init();
   /* Request a DMA channel */
